@@ -21,27 +21,41 @@ def handler(request):
         video_url = body.get("url")
 
         if not video_url:
-            return {
-                "statusCode": 400,
-                "body": json.dumps({"error": "URLが指定されていません。"})
-            }
+            return cors_response(
+                400,
+                {"error": "URLが指定されていません。"}
+            )
 
         # フォーマットの最初のURLを取得
         format_url = get_first_format_url(video_url)
 
         if format_url:
-            return {
-                "statusCode": 200,
-                "body": json.dumps({"url": format_url})
-            }
+            return cors_response(
+                200,
+                {"url": format_url}
+            )
         else:
-            return {
-                "statusCode": 404,
-                "body": json.dumps({"error": "フォーマットが見つかりませんでした。"})
-            }
+            return cors_response(
+                404,
+                {"error": "フォーマットが見つかりませんでした。"}
+            )
 
     except Exception as e:
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"error": str(e)})
-        }
+        return cors_response(
+            500,
+            {"error": str(e)}
+        )
+
+def cors_response(status_code, body):
+    """
+    CORSヘッダーを追加したレスポンスを作成するヘルパー関数
+    """
+    return {
+        "statusCode": status_code,
+        "headers": {
+            "Access-Control-Allow-Origin": "*",  # 全てのオリジンを許可
+            "Access-Control-Allow-Methods": "POST, OPTIONS",  # 許可するHTTPメソッド
+            "Access-Control-Allow-Headers": "Content-Type"  # 許可するヘッダー
+        },
+        "body": json.dumps(body)
+    }
